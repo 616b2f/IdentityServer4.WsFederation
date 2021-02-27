@@ -77,8 +77,8 @@ namespace IdentityServer4.WsFederation
 
         private WsFederationMessage GetSignInRequestMessage(string returnUrl)
         {
-            var decoded = WebUtility.UrlDecode(returnUrl);
-            WsFederationMessage message = WsFederationMessage.FromQueryString(decoded);
+            var uri = new Uri("https://dummy.com" + returnUrl);
+            WsFederationMessage message = WsFederationMessage.FromUri(uri);
             if (message.IsSignInMessage)
                 return message;
             return null;
