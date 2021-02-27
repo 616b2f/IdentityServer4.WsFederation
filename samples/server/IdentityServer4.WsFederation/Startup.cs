@@ -22,7 +22,8 @@ namespace IdentityServer4.WsFederation
                 .AddInMemoryApiResources(Config.GetApiResources())
                 .AddInMemoryClients(Config.GetClients())
                 .AddTestUsers(TestUsers.Users)
-                .AddWsFederation();
+                .AddWsFederation()
+                .AddInMemoryRelyingParties(Config.GetRelyingParties());
 
             services.AddAuthentication()
                 .AddGoogle("Google", "Google", options =>
