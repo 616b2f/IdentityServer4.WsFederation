@@ -50,6 +50,8 @@ namespace IdentityServer4.WsFederation
             _logger = logger;
         }
 
+        private string Issuer => _contextAccessor.HttpContext.GetIdentityServerIssuerUri();
+
         public async Task<WsFederationMessage> GenerateResponseAsync(SignInValidationResult validationResult)
         {
             _logger.LogDebug("Creating WS-Federation signin response");
@@ -86,9 +88,9 @@ namespace IdentityServer4.WsFederation
             };
 
             await _profile.GetProfileDataAsync(ctx);
-            
+
             // map outbound claims
-            var nameid = new Claim(ClaimTypes.NameIdentifier, result.User.GetSubjectId());
+            var nameid = new Claim(ClaimTypes.NameIdentifier, result.User.GetSubjectId(), ClaimValueTypes.String, Issuer);
             nameid.Properties[Microsoft.IdentityModel.Tokens.Saml.ClaimProperties.SamlNameIdentifierFormat] = result.RelyingParty.SamlNameIdentifierFormat;
 
             var outboundClaims = new List<Claim> { nameid };
@@ -96,7 +98,7 @@ namespace IdentityServer4.WsFederation
             {
                 if (result.RelyingParty.ClaimMapping.ContainsKey(claim.Type))
                 {
-                    var outboundClaim = new Claim(result.RelyingParty.ClaimMapping[claim.Type], claim.Value);
+                    var outboundClaim = new Claim(result.RelyingParty.ClaimMapping[claim.Type], claim.Value, ClaimValueTypes.String, Issuer);
                     if (outboundClaim.Type == ClaimTypes.NameIdentifier)
                     {
                         outboundClaim.Properties[Microsoft.IdentityModel.Tokens.Saml.ClaimProperties.SamlNameIdentifierFormat] = result.RelyingParty.SamlNameIdentifierFormat;
@@ -123,15 +125,15 @@ namespace IdentityServer4.WsFederation
             // else defaults to Unspecified.
             if (result.User.GetAuthenticationMethod() == OidcConstants.AuthenticationMethods.Password)
             {
-                outboundClaims.Add(new Claim(ClaimTypes.AuthenticationMethod, SamlConstants.AuthenticationMethods.PasswordString));
+                outboundClaims.Add(new Claim(ClaimTypes.AuthenticationMethod, SamlConstants.AuthenticationMethods.PasswordString, ClaimValueTypes.String, Issuer));
             }
             else
             {
-                outboundClaims.Add(new Claim(ClaimTypes.AuthenticationMethod, SamlConstants.AuthenticationMethods.UnspecifiedString));
+                outboundClaims.Add(new Claim(ClaimTypes.AuthenticationMethod, SamlConstants.AuthenticationMethods.UnspecifiedString, ClaimValueTypes.String, Issuer));
             }
 
             // authentication instant claim is required
-            outboundClaims.Add(new Claim(ClaimTypes.AuthenticationInstant, XmlConvert.ToString(result.User.GetAuthenticationTime(), "yyyy-MM-ddTHH:mm:ss.fffZ"), ClaimValueTypes.DateTime));
+            outboundClaims.Add(new Claim(ClaimTypes.AuthenticationInstant, XmlConvert.ToString(result.User.GetAuthenticationTime(), "yyyy-MM-ddTHH:mm:ss.fffZ"), ClaimValueTypes.DateTime, Issuer));
 
             return new ClaimsIdentity(outboundClaims, "idsrv");
         }
@@ -149,7 +151,7 @@ namespace IdentityServer4.WsFederation
                 Expires = DateTime.UtcNow.AddSeconds(result.Client.IdentityTokenLifetime),
                 SigningCredentials = new SigningCredentials(key, result.RelyingParty.SignatureAlgorithm, result.RelyingParty.DigestAlgorithm),
                 Subject = outgoingSubject,
-                Issuer = _contextAccessor.HttpContext.GetIdentityServerIssuerUri(),
+                Issuer = _contextAccessor.HttpContext.GetIdentityServerIssuerUri()
             };
 
             if (result.RelyingParty.EncryptionCertificate != null)
