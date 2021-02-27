@@ -14,10 +14,12 @@ namespace IdentityServer4.WsFederation.Tests
         private readonly TestUserStore _userStore;
         private readonly IIdentityServerInteractionService _interaction;
 
-        public FakeAccountController(TestUserStore userStore)
+        public FakeAccountController(
+            TestUserStore userStore,
+            IIdentityServerInteractionService interaction)
         {
             _userStore = userStore;
-            
+            _interaction = interaction;
         }
 
         [HttpGet]

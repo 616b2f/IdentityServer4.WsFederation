@@ -16,10 +16,10 @@ namespace AspNetCoreSecurity
             services.AddMvc();
 
             services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = WsFederationDefaults.AuthenticationScheme;
-            })
+                {
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = WsFederationDefaults.AuthenticationScheme;
+                })
                 .AddCookie(options =>
                 {
                     options.Cookie.Name = "aspnetcorewsfed";

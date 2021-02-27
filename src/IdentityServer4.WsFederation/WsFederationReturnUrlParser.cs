@@ -63,7 +63,7 @@ namespace IdentityServer4.WsFederation
             var request = new AuthorizationRequest()
             {
                 ClientId = result.Client.ClientId,
-                IdP = result.WsFederationMessage.Wtrealm,
+                IdP = result.WsFederationMessage.Whr,
                 RedirectUri = result.WsFederationMessage.Wreply
             };
 
